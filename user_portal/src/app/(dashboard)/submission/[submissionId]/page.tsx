@@ -354,10 +354,10 @@ export default function SubmissionDetailPage() {
 
                   <p
                     className={`text-sm font-medium ${isExpired
-                        ? "text-rose-600"
-                        : isExpiringSoon
-                          ? "text-amber-600"
-                          : "text-slate-900"
+                      ? "text-rose-600"
+                      : isExpiringSoon
+                        ? "text-amber-600"
+                        : "text-slate-900"
                       }`}
                   >
                     {deadlineDate
@@ -408,23 +408,68 @@ export default function SubmissionDetailPage() {
             </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {data.fields.map((field, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="space-y-2 p-4 rounded-lg border border-slate-200 bg-slate-50"
-                >
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {field.label}
-                  </p>
-                  <p className="text-sm font-medium text-slate-900 break-words">
-                    {field.value || "—"}
-                  </p>
+              {data.fields.map((field, index) => {
+                const isFile = field.type === "file";
 
-                </motion.div>
-              ))}
+                const cleanPath = field.value
+                  ? field.value.replace(/^\/+/, "")
+                  : null;
+
+                const fileUrl = isFile && cleanPath
+                  ? `/${cleanPath}`   // uses proxy (no backend URL)
+                  : null;
+
+                const fileName = cleanPath
+                  ? cleanPath.split("/").pop()
+                  : null;
+
+                return (
+                  <motion.div
+                    key={`${field.label}-${index}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="space-y-2 p-4 rounded-lg border border-slate-200 bg-slate-50"
+                  >
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {field.label}
+                    </p>
+
+                    {isFile ? (
+                      fileUrl ? (
+                        <a
+                          href={fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline break-all transition-colors"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                            />
+                          </svg>
+                          {fileName}
+                        </a>
+                      ) : (
+                        <p className="text-sm text-slate-400">—</p>
+                      )
+                    ) : (
+                      <p className="text-sm font-medium text-slate-900 break-words">
+                        {field.value || "—"}
+                      </p>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </CardContent>

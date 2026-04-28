@@ -173,8 +173,8 @@ function SendBackModal({ onClose, onSubmit, loading }: {
 
 const stageColors: Record<WorkflowStatus, { bg: string; border: string; icon: string; text: string }> = {
   Completed: { bg: '#F0FDF4', border: '#22C55E', icon: '#22C55E', text: '#065F46' },
-  Current:   { bg: '#EFF6FF', border: '#3B82F6', icon: '#3B82F6', text: '#1D4ED8' },
-  Pending:   { bg: 'var(--bg)', border: 'var(--border)', icon: '#94A3B8', text: 'var(--text-muted)' },
+  Current: { bg: '#EFF6FF', border: '#3B82F6', icon: '#3B82F6', text: '#1D4ED8' },
+  Pending: { bg: 'var(--bg)', border: 'var(--border)', icon: '#94A3B8', text: 'var(--text-muted)' },
 };
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
@@ -248,8 +248,8 @@ export default function FormDetailsPage() {
     }
   };
 
-  const handleApprove  = () => callAction('approve');
-  const handleReject   = (remark: string) => { setRejectModal(false);   callAction('reject',   remark); };
+  const handleApprove = () => callAction('approve');
+  const handleReject = (remark: string) => { setRejectModal(false); callAction('reject', remark); };
   const handleSendBack = (remark: string) => { setSendBackModal(false); callAction('sendback', remark); };
 
   // ── Loading ─────────────────────────────────────────────────────────────────
@@ -306,7 +306,7 @@ export default function FormDetailsPage() {
       )}
 
       {/* Modals */}
-      {rejectModal   && <RejectModal   onClose={() => setRejectModal(false)}   onSubmit={handleReject}   loading={actionLoading} />}
+      {rejectModal && <RejectModal onClose={() => setRejectModal(false)} onSubmit={handleReject} loading={actionLoading} />}
       {sendBackModal && <SendBackModal onClose={() => setSendBackModal(false)} onSubmit={handleSendBack} loading={actionLoading} />}
 
       {/* Back nav */}
@@ -477,14 +477,59 @@ export default function FormDetailsPage() {
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No fields submitted.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {fields.map(field => (
-                  <div key={field.label} className="rounded-xl p-4"
-                    style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
-                    <p className="text-xs font-semibold uppercase tracking-wide mb-1.5"
-                      style={{ color: 'var(--text-muted)' }}>{field.label}</p>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{field.value}</p>
-                  </div>
-                ))}
+                {fields.map((field, idx) => {
+                  const isFile = field.type === 'file';
+                  const fileUrl = isFile && field.value
+                    ? `${field.value}`
+                    : null;
+
+                  return (
+                    <div
+                      key={`${field.label}-${idx}`}
+                      className="rounded-xl p-4"
+                      style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wide mb-1.5"
+                        style={{ color: 'var(--text-muted)' }}>
+                        {field.label}
+                      </p>
+
+                      {isFile ? (
+                        fileUrl ? (
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm hover:underline break-all transition-colors"
+                            style={{ color: 'var(--primary, #A855F7)' }}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 shrink-0"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                              />
+                            </svg>
+                            {field.value.split('/').pop()}
+                          </a>
+                        ) : (
+                          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>—</p>
+                        )
+                      ) : (
+                        <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>
+                          {field.value || '—'}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -524,10 +569,10 @@ export default function FormDetailsPage() {
 
             <div className="space-y-3 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
               {[
-                { icon: Hash,     label: 'Form',      val: form.title },
-                { icon: Calendar, label: 'Submitted',  val: new Date(submission.submissionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) },
-                { icon: Clock,    label: 'Deadline',   val: formatDeadline(form.deadline) },
-                { icon: Mail,     label: 'Email',      val: student.email },
+                { icon: Hash, label: 'Form', val: form.title },
+                { icon: Calendar, label: 'Submitted', val: new Date(submission.submissionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) },
+                { icon: Clock, label: 'Deadline', val: formatDeadline(form.deadline) },
+                { icon: Mail, label: 'Email', val: student.email },
               ].map(({ icon: Icon, label, val }) => (
                 <div key={label} className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -569,14 +614,13 @@ export default function FormDetailsPage() {
                   style={{
                     background:
                       s.status === 'Completed' ? '#F0FDF4' :
-                      s.status === 'Current'   ? '#EFF6FF' : 'var(--bg)',
+                        s.status === 'Current' ? '#EFF6FF' : 'var(--bg)',
                     color:
                       s.status === 'Completed' ? '#22C55E' :
-                      s.status === 'Current'   ? '#3B82F6' : 'var(--text-muted)',
-                    border: `1px solid ${
-                      s.status === 'Completed' ? '#22C55E40' :
-                      s.status === 'Current'   ? '#3B82F640' : 'var(--border)'
-                    }`,
+                        s.status === 'Current' ? '#3B82F6' : 'var(--text-muted)',
+                    border: `1px solid ${s.status === 'Completed' ? '#22C55E40' :
+                        s.status === 'Current' ? '#3B82F640' : 'var(--border)'
+                      }`,
                   }}>
                   {s.level}
                 </div>

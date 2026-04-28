@@ -302,13 +302,18 @@ export default async function SubmissionDetailsPage({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {fields.map((field, idx) => {
                 const isFile = field.type === 'file';
-                const fileUrl = isFile && field.value
-                  ? `${process.env.BACKEND_URL}${field.value}`
-                  : null;
-                const fileName = field.value
-                  ? field.value.split('/').pop()
+
+                const cleanPath = field.value
+                  ? field.value.replace(/^\/+/, '') // remove leading slashes
                   : null;
 
+                const fileUrl = isFile && cleanPath
+                  ? `/${cleanPath}`
+                  : null;
+
+                const fileName = cleanPath
+                  ? cleanPath.split('/').pop()
+                  : null;
                 return (
                   <div
                     key={`${field.label}-${idx}`}
