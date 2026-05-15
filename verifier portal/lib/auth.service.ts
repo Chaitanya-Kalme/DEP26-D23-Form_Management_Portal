@@ -29,7 +29,7 @@ export type VerifierRole = typeof VERIFIER_ROLES[number];
 export const AuthService = {
 
   async loginWithGoogle(): Promise<void> {
-    await signIn('google', { callbackUrl: '/verifier/dashboard' });
+    await signIn('google', { callbackUrl: '/dashboard' });
   },
 
   mapSession(session: Session): AuthUser | null {

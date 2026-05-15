@@ -25,7 +25,7 @@ export const AuthService = {
     // No state/portal param needed — this is admin portal only
     async loginWithGoogle(): Promise<void> {
         await signIn('google', {
-            callbackUrl: '/admin/dashboard',
+            callbackUrl: '/dashboard',
         });
     },
 
